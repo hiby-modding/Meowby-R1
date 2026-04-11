@@ -42,10 +42,12 @@ The CS43131 supports hardware native DSD over I2S.
 
 ---
 
-### 4. Missing Audio Engine Keys Added
+### 4. Missing Audio Engine Keys — Investigated, Not Applied
 **File:** `usr/resource/ot_devices.json`
 
-The player binary reads these keys from `ot_devices.json` but they were absent, causing fallback to hardcoded defaults. Added explicitly at the top level:
+> **Reverted — not applied in this build.**
+
+The player binary reads several keys from `ot_devices.json` that were absent in stock firmware, causing fallback to hardcoded defaults. The following keys were tested:
 
 ```json
 "DOP_MAX_VOLUME":           100,
@@ -59,7 +61,9 @@ The player binary reads these keys from `ot_devices.json` but they were absent, 
 
 `ANALOG_PCM_HW_SAMPLE_MAX: 384000` matches the CS43131's hardware ceiling and the analog device `SampleRate` list already declared in the same file.  
 `SPDIF_MAX_192K: 0` removes the 192 kHz cap on the SPDIF output path.  
-`USE_VOLUME_CHIP: 0` — **must be `0`**. Setting this to `1` forces volume writes directly to the CS43131 ALSA hardware registers, which are not wired up in this firmware version. With `1`, the volume buttons show UI movement but produce no audio change. With `0`, volume stays on the software path where the physical buttons are correctly mapped.
+`USE_VOLUME_CHIP: 0` — **must be `0`** if used. Setting this to `1` forces volume writes directly to the CS43131 ALSA hardware registers, which are not wired up in this firmware version. With `1`, the volume buttons show UI movement but produce no audio change.
+
+These keys were removed after testing — the firmware behaves correctly without them using its built-in defaults.
 
 ---
 
@@ -95,7 +99,19 @@ Same fix applied to the standard HiBy R1 themes to ensure radio is visible under
 
 ---
 
-### 8. Font Replaced — Roboto
+### 8. Bluetooth Audio Quality — SBC XQ
+**File:** `usr/bin/bt_init`
+
+Added `--sbc-quality=xq` to the BlueALSA launch. SBC XQ uses bitpool 76 in dual-channel HD mode (~500 kbps). Falls back automatically to standard high quality (bitpool 53) if the connected device does not advertise XQ support.
+
+**BlueALSA launch line:**
+```sh
+/usr/bin/bluealsa -p a2dp-source --a2dp-volume --sbc-quality=xq &
+```
+
+---
+
+### 9. Font Replaced — Roboto
 **File:** `usr/resource/fonts/default.otf`
 
 Removed the stock `default.otf` (155 KB, HiBy custom font) and replaced it with the Roboto font family as `default.otf` (~10 MB total). Roboto provides broader Latin/Cyrillic coverage and better legibility at small display sizes.
@@ -136,12 +152,13 @@ Replaced the stock player binary with the community-patched sorting variant from
 | 1 | Volume cap lifted 50 → 100 | `usr/resource/config.json` |
 | 2 | MDB/LDB gain table ceiling 12 → 0 (true 0 dB) | `usr/resource/ot_devices.json` |
 | 3 | Native DSD output enabled (`AnalogDsdNative`) | `usr/resource/ot_devices.json` |
-| 4 | Missing audio engine keys added | `usr/resource/ot_devices.json` | but deleted because I didn't liked it.
+| 4 | ~~Audio engine keys added~~ **REVERTED** — defaults are sufficient | `usr/resource/ot_devices.json` |
 | 5 | ~~HW-only volume (`SET_HW_SW_VOL_BOTH` 1 → 0)~~ **REVERTED** — breaks volume buttons | `usr/resource/ot_devices.json` |
-| 6 | Patched player binary — article/symbol sort fix | `usr/bin/hiby_player` |
-| 7 | Font replaced: stock `default.otf` → Roboto (~10 MB) | `usr/resource/fonts/default.otf` |
-| 8 | Removed Thai locale strings | `usr/resource/str/thai/` |
-| 9 | Removed Korean locale strings | `usr/resource/str/korean/` |
+| 6 | Internet Radio enabled for English — MiDi R1 | `usr/resource/layout/midi/theme1/hiby_stream_media.view` |
+| 7 | Internet Radio enabled for English — HiBy R1 (Theme 1 & 2) | `usr/resource/layout/theme1/hiby_stream_media.view`, `theme2/...` |
+| 8 | SBC XQ enabled (~500 kbps, bitpool 76) | `usr/bin/bt_init` |
+| 9 | Font replaced: stock `default.otf` → Roboto (~10 MB); Thai & Korean locale strings removed | `usr/resource/fonts/default.otf` |
+| 10 | Patched player binary — article/symbol sort fix | `usr/bin/hiby_player` |
 
 ---
 
@@ -215,37 +232,6 @@ adb shell amixer cset name='Digital Filter' 4
 adb shell amixer cget name='Digital Filter'
 ```
 
-### FIR Filters via hm100 DSP (SD card or adb)
-
-Custom FIR filter coefficients can be applied at the kernel DSP level.
-
-**Mechanism:** Write the filter filename to `/sys/devices/platform/hm100/filter_path`  
-**SD card folder:** `filter/` in the SD card root (for Darwin-style filter packs)
-
-The filter filenames below are referenced in the `hiby_player` binary. They can be loaded via adb even if the Darwin UI is not accessible in the R1's menus:
-
-```sh
-# example — apply bass boost filter
-echo "bass - boost.flt" > /sys/devices/platform/hm100/filter_path
-```
-
-| File | Type |
-|------|------|
-| `1.flt` – `4.flt` | Generic presets |
-| `bass - boost.flt` | Bass boost |
-| `inverse-sinc-lowpass-254-normal.flt` | IsinC, linear phase |
-| `inverse-sinc-lowpass-254-min-phase.flt` | IsinC, minimum phase |
-| `nyquist-30-rolloff-minphase.flt` | Nyquist 30%, min phase |
-| `nyquist-30-slow-rolloff-minphase.flt` | Nyquist slow, min phase |
-| `raised-cosine-254-rolloff-normal.flt` | Raised cosine, normal |
-| `raised-cosine-254-rolloff-square.flt` | Raised cosine, square |
-| `raised-cosine-254-fast-rolloff-normal.flt` | Fast raised cosine |
-| `raised-cosine-254-slow-rolloff-normal.flt` | Slow raised cosine |
-
-> **Note:** The Darwin filter selection UI (which would expose these through a menu) is present in the firmware strings but has no layout file in the R1 themes — it is not accessible via the on-device UI.
-
-Community filter pack (Darwin V2, R2R-targeted but same mechanism):  
-`https://www.dropbox.com/scl/fi/4o7k57n87pqmvvfen65wv/Darwin_v2-forward-direction.zip?rlkey=poyh3xyjf3hkx6dmzu2oim7og&dl=0`
 
 ---
 
@@ -254,7 +240,7 @@ Community filter pack (Darwin V2, R2R-targeted but same mechanism):
 | Feature | Location | Notes |
 |---------|----------|-------|
 | Factory test mode | `usr/resource/layout/theme1/test/hiby_test.view` | LCD, touch, key, BT, WiFi, FM hardware tests. Strings only in `simplified_chinese` and `english` locales |
-| NOS mode | `hm100` kernel module | **Not functional on R1** — `hm100` is absent from the R1 kernel. The sysfs path does not exist. |
+
 
 ---
 
