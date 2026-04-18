@@ -361,6 +361,106 @@ for offset in 974708 3007408 3014304 3052412; do
     printf '\xe8\xfd' | dd of="$FILE" bs=1 seek=$offset conv=notrunc
 done
 ----
+
+# HiBy R1 Sound Enhancement
+
+Config-only audio improvements for the HiBy R1 portable DAP. No binaries compiled. All changes are reversible.
+
+---
+
+## What This Does
+
+| Change | File | Effect |
+|--------|------|--------|
+| ALSA PCM pipeline | `usr/data/asound.conf` | High-quality resampling + 256-step software volume |
+| Volume tuning | `usr/resource/config.json` | Lower startup volume, wider range |
+| EQ preset rename | `usr/resource/str/english/eq.ini` | "Custom" → "Headphones" slot for PEQ settings |
+
+---
+
+## Device
+
+- **Model:** HiBy R1
+- **OS:** Embedded Linux (MIPS32, kernel 2.6.32)
+- **DAC:** Cirrus Logic CS43131 — confirmed at card 0 (`pcmC0D0p`)
+
+---
+
+## Files Changed
+
+```
+usr/data/asound.conf                          ← ALSA plug + softvol chain
+usr/resource/config.json                      ← Volume defaults
+usr/resource/str/english/eq.ini               ← EQ preset label
+```
+
+**Originals backed up in:** `docs/superpowers/backups/`
+
+---
+
+## ALSA Signal Chain
+
+```
+hiby_player
+    └── pcm.!default (asym)
+            └── playback → pcm.sv_out (softvol, 256 steps, −51 dB to 0 dB)
+                                └── pcm.hq_out (plug, resampling)
+                                        └── hw:0,0  (CS43131 DAC)
+            └── capture  → hw:0,0 (direct)
+```
+
+---
+
+## Volume Settings
+
+| Setting | Before | After |
+|---------|--------|-------|
+| Default volume | 20 | 15 |
+| Warning threshold | 34 | 42 |
+| Max (lock) volume | 50 | 60 |
+
+---
+
+## Deploy
+
+### Option A — ADB push (device running)
+
+```bash
+adb push usr/data/asound.conf /usr/data/asound.conf
+adb push usr/resource/config.json /usr/resource/config.json
+adb push "usr/resource/str/english/eq.ini" "/usr/resource/str/english/eq.ini"
+adb shell reboot
+```
+
+### Option B — Repack squashfs
+
+```bash
+mksquashfs squashfs-root hiby_r1_enhanced.sqsh -comp xz -b 131072 -no-xattrs
+```
+
+Flash via OTA or recovery mode.
+
+---
+
+## After Flashing — Manual Setup
+
+Configure once on the device:
+
+1. **ReplayGain** — Settings → Play → ReplayGain → select **by Track**
+2. **Crossfade** — Settings → Play → Crossfade → **On**
+3. **Gapless playback** — Settings → Play → Gapless playback → **On**
+4. **Parametric EQ** — Settings → Equalizer → select **Headphones** → tap **PEQ**
+
+PEQ settings (Headphones preset):
+
+| Band | Type | Frequency | Gain | Q |
+|------|------|-----------|------|---|
+| 1 | Low Shelf | 100 Hz | +3.0 dB | — |
+| 2 | Peaking | 3000 Hz | +1.5 dB | 1.2 |
+| 3 | High Shelf | 10000 Hz | −2.0 dB | — |
+
+---
+
 ## Disclaimer
 
 These are filesystem-level config and layout file edits — no kernel modifications.  
