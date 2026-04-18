@@ -330,7 +330,37 @@ Both timeouts were `0` — meaning the device stayed permanently discoverable an
 After 3 minutes with no pairing the device stops advertising. Already-paired devices reconnect normally — this only affects new-pairing discovery broadcasts.
 
 ---
+## HiBy R1 — File Limit Patch (50,000 → 65,000 Tracks)
 
+**Target binary:** `/usr/bin/hiby_player` (MIPS32 LE ELF, 4,855,400 bytes)  
+**Change:** Increases the music database track limit from 50,000 to 65,000 (`0xC350` → `0xFDE8`)
+
+---
+
+### Patch Locations
+
+| Offset (hex) | Offset (dec) | Before | After | Instruction |
+|---|---|---|---|---|
+| `0x000EDF74` | 974,708 | `50 C3 02 34` | `E8 FD 02 34` | `ORI $v0, $zero, 65000` |
+| `0x002DE3B0` | 3,007,408 | `50 C3 02 34` | `E8 FD 02 34` | `ORI $v0, $zero, 65000` |
+| `0x002DFEA0` | 3,014,304 | `50 C3 04 34` | `E8 FD 04 34` | `ORI $a0, $zero, 65000` |
+| `0x002E937C` | 3,052,412 | `50 C3 04 34` | `E8 FD 04 34` | `ORI $a0, $zero, 65000` |
+
+---
+
+### How to Apply
+
+> **Back up your original binary before patching.**
+
+Using `dd` on Linux/macOS:
+
+```bash
+FILE="hiby_player"
+cp "$FILE" "${FILE}.orig"
+for offset in 974708 3007408 3014304 3052412; do
+    printf '\xe8\xfd' | dd of="$FILE" bs=1 seek=$offset conv=notrunc
+done
+----
 ## Disclaimer
 
 These are filesystem-level config and layout file edits — no kernel modifications.  
