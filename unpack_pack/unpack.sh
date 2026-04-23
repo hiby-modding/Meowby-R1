@@ -32,7 +32,7 @@ echo "Extracting rootfs.squashfs to squashfs-root (Requires sudo)..."
 rm -rf squashfs-root 2>/dev/null
 sudo unsquashfs -f -d squashfs-root rootfs.squashfs
 
-rm -rf __unpack_tmp
+rm -rf __unpack_tmp rootfs.squashfs
 echo "✅ Unpack complete!"
 echo "Original filesystem extracted to: squashfs-root/"
 echo "Kernel saved as: xImage"

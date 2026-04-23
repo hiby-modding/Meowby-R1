@@ -63,7 +63,7 @@
           chmod +x "$TEMP_SCRIPT"
           
           # Execute the modified script
-          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "$@"
+          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "./squashfs-root/"
         '';
 
       in {
