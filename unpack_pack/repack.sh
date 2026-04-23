@@ -81,7 +81,7 @@ echo "current_version=0" > ota_config.in
 
 echo "5. Generating ISO image ($OUT_PKG) using genisoimage..."
 # Use genisoimage with exact parameters from r1_patcher.sh
-genisoimage -f -U -J -joliet-long -r -allow-lowercase -allow-multidot -o "../../../$OUT_PKG" . >/dev/null 2>&1
+genisoimage -f -U -J -joliet-long -r -allow-lowercase -allow-multidot -o "../../../$OUT_PKG" .
 
 cd ../../../
 rm -rf __repack_tmp
