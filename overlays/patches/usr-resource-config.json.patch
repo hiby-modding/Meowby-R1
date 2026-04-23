@@ -1,5 +1,17 @@
 --- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/resource/config.json	2025-12-03 05:23:01.000000000 +0100
-+++ ./usr/resource/config.json	2026-04-23 15:39:42.918710095 +0200
++++ ./usr/resource/config.json	2026-04-23 19:08:22.315836736 +0200
+@@ -5,9 +5,9 @@
+     },
+     {
+         "type":"product",
+-        "company":"HiBy",
++        "company":"MeowBi",
+         "device":"R1",
+-        "version":"1.6",
++        "version":"meowifiyed-1.6",
+         "ota_name":"HiBy R1",
+         "usb_pid":"0x0101",
+         "dac_pid":"0x0004",
 @@ -22,13 +22,13 @@
          "type":"volume",
          "vol_warn_enable":1,

@@ -1,0 +1,6 @@
+--- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/resource/hostname	2025-11-26 11:54:20.000000000 +0100
++++ ./usr/resource/hostname	2026-04-23 19:04:19.019022475 +0200
+@@ -1 +1 @@
+-HiBy R1
+\ No newline at end of file
++MeowBi R1
