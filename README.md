@@ -1,3 +1,6 @@
+**This README was created by [bidhata](https://github.com/bidhata) on GitHub (big thanks for that <3). some of these are implemented in this repo, others arent**
+
+
 # HiBy R1 / MiDi R1 Firmware Modifications
 
 Firmware patches for the **HiBy R1** and **MiDi R1** portable music players.  
