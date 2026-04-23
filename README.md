@@ -1,5 +1,24 @@
+# build tooling
+This repo contains a nix [flake](./flake.nix) which implements tooling for easy development, fully reproduicable builds and without fear of a DMCA :3
+
+The [overlays directory](./overlays) only contains actual changes instead of the entire firmware source code.
+A local copy of the Firmware for development can be generated using `nix run .#unpack` where one then can make changes.
+After meowking the desired changes one simply runs `nix run .#create-overlay` to generate the [patch files](./overlays/patches/usr-bin-bt_init.patch). This basically compares the local working copy against a imutable copy of the original firmware.
+
+To build a ready-to-deploy fw image based of these patches one simply runs these 3 commands:
+1. `nix run .#unpack`
+2. `nix run .#apply-overlay`
+3. `nix run .#repack`
+
+# Goals for Meowby:
+
 My ultimate goal with this for is the implementation ofd a Open-Subsonic client for streaming from selfhoseted music servers.
 
+
+
+
+
+---
 **the following contents of the README were created by [bidhata](https://github.com/bidhata) over on GitHub (big thanks for that <3). some of these are implemented in this repo, others arent**
 
 
