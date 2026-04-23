@@ -1,0 +1,11 @@
+--- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/bin/bt_init	2025-11-26 11:49:26.000000000 +0100
++++ ./usr/bin/bt_init	2026-04-23 16:04:40.509134732 +0200
+@@ -86,7 +86,7 @@
+ 
+ # launch bluealas server
+ 
+-/usr/bin/bluealsa -p a2dp-source --a2dp-volume &
++/usr/bin/bluealsa -p a2dp-source --a2dp-volume --sbc-quality=xq &
+ 
+ ALSA_CONF_FILE="/usr/data/alsa.conf"
+ # 创建默认alsa配置文件
