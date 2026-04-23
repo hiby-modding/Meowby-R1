@@ -1,4 +1,6 @@
-**This README was created by [bidhata](https://github.com/bidhata) on GitHub (big thanks for that <3). some of these are implemented in this repo, others arent**
+My ultimate goal with this for is the implementation ofd a Open-Subsonic client for streaming from selfhoseted music servers.
+
+**the following contents of the README were created by [bidhata](https://github.com/bidhata) over on GitHub (big thanks for that <3). some of these are implemented in this repo, others arent**
 
 
 # HiBy R1 / MiDi R1 Firmware Modifications
