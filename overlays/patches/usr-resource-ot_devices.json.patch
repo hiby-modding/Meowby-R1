@@ -1,5 +1,14 @@
 --- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/resource/ot_devices.json	2025-11-26 11:54:20.000000000 +0100
-+++ ./usr/resource/ot_devices.json	2026-04-23 15:38:12.706446125 +0200
++++ ./usr/resource/ot_devices.json	2026-04-23 15:41:12.953972723 +0200
+@@ -14,7 +14,7 @@
+ 			"DSDMode":	   1,
+             "AnalogDsdD2p": "dop",
+             "AnalogDsdDop": "dop",
+-            "AnalogDsdNative": "dop",
++            "AnalogDsdNative": "native",
+ 			"SampleRate": "32000,44100,48000,88200,96000,176400,192000,352800,384000"
+         },
+         {
 @@ -98,7 +98,7 @@
                          51,  50,  49,  48,  47,  46,  45,  44,  43,  42,
                          41,  40,  39,  38,  37,  36,  35,  34,  33,  32,
