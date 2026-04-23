@@ -1,0 +1,18 @@
+--- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/bin/hiby_player.sh	2025-11-26 11:49:26.000000000 +0100
++++ ./usr/bin/hiby_player.sh	2026-04-23 15:58:12.807916368 +0200
+@@ -3,13 +3,7 @@
+ killall    hiby_player    &>/dev/null
+ killall -9 hiby_player    &>/dev/null
+ 
+-if [ -f "/usr/bin/batd" ]; then
+-killall    batd    &>/dev/null
+-killall -9 batd    &>/dev/null
+-/usr/bin/batd -v -s -t5 -o /mnt/sd_0/batlog.txt &
+-fi
+-
+ #/usr/bin/hiby_player &>/dev/null
+ /usr/bin/hiby_player
+ sleep 1
+-reboot
+\ No newline at end of file
++reboot
