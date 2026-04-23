@@ -1,4 +1,6 @@
 /result
 /squashfs-root
+/squashfs-root-clean
 /xImage
 /r1_repacked.upt
+/overlays/patch-reference

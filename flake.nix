@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils = {
       url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -23,6 +22,9 @@
           coreutils          # md5sum, split, stat, cat
           fakeroot           # replace sudo requirement
           bash               # shell interpreter
+          rsync              # for overlay file copying
+          patch              # for applying patches
+          diffutils          # for generating patches
         ];
 
         hiByOS-v1-6 = pkgs.fetchurl {
@@ -45,8 +47,7 @@
             ${./unpack_pack/unpack.sh} > "$TEMP_SCRIPT"
           chmod +x "$TEMP_SCRIPT"
           
-          # Execute the modified script
-          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "${self.packages.${system}.original}"
+          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "${self.packages.${system}.original}" "$@"
         '';
 
         # Create wrapper that replaces sudo with fakeroot in the original repack script  
@@ -66,6 +67,21 @@
           exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "./squashfs-root/"
         '';
 
+        # Overlay management wrappers
+        apply-overlay-wrapper = pkgs.writeScriptBin "hiby-apply-overlay" ''
+          #!${lib.getExe pkgs.bash}
+          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
+          cd "$(pwd)"
+          exec ${lib.getExe pkgs.bash} ${./overlays/scripts/apply-overlay.sh} "$@"
+        '';
+
+        create-overlay-wrapper = pkgs.writeScriptBin "hiby-create-overlay" ''
+          #!${lib.getExe pkgs.bash}
+          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
+          cd "$(pwd)"
+          exec ${lib.getExe pkgs.bash} ${./overlays/scripts/create-overlay.sh} "$@"
+        '';
+
       in {
         apps = {
           unpack = {
@@ -77,13 +93,23 @@
             type = "app";
             program = "${repack-wrapper}/bin/hiby-repack";
           };
+
+          apply-overlay = {
+            type = "app";
+            program = "${apply-overlay-wrapper}/bin/hiby-apply-overlay";
+          };
+
+          create-overlay = {
+            type = "app";
+            program = "${create-overlay-wrapper}/bin/hiby-create-overlay";
+          };
         };
 
         packages = {
-          inherit unpack-wrapper repack-wrapper;
+          inherit unpack-wrapper repack-wrapper apply-overlay-wrapper create-overlay-wrapper;
           default = pkgs.symlinkJoin {
             name = "hiby-tools";
-            paths = [ unpack-wrapper repack-wrapper ];
+            paths = [ unpack-wrapper repack-wrapper apply-overlay-wrapper create-overlay-wrapper ];
           };
           original = hiByOS-v1-6;
         };
