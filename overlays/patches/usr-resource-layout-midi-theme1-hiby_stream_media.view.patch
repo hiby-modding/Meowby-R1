@@ -1,0 +1,49 @@
+--- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/resource/layout/midi/theme1/hiby_stream_media.view	2025-11-26 11:54:20.000000000 +0100
++++ ./usr/resource/layout/midi/theme1/hiby_stream_media.view	2026-04-23 15:46:29.216890100 +0200
+@@ -35,6 +35,39 @@
+ 		},
+ 		"viewgroup":{
+ 				"imageview":{
++					"name":"stream_media_iv_radio",
++					"img_path":"stream_media\\radio.png",
++					"img_focus_path":"stream_media\\radio_s.png",
++					"x":0,
++					"y":0,
++					"imageview":true
++				},
++				"textview":{
++					"name":"stream_media_tv_radio",
++					"size":26,
++					"color":"0xffffff",
++					"focus_color":"0xffffff",
++					"type":"static|center",
++					"ini":"settings.ini",
++					"text":"net_radio",
++					"x":2,
++					"y":130,
++					"w":210,
++					"h":60,
++					"textview":true
++				},
++			"name":"stream_media_vg_radio",
++			"type":"lg_view",
++			"color":"0x1",
++			"focus_color":"0x1",
++			"x":18,
++			"y":238,
++			"w":212,
++			"h":190,
++			"viewgroup":true
++		},
++		"viewgroup":{
++				"imageview":{
+ 					"name":"stream_media_iv_qobuz",
+ 					"img_path":"stream_media\\qobuz.png",
+ 					"img_focus_path":"stream_media\\qobuz_s.png",
+@@ -90,4 +123,4 @@
+ 		"viewgroup":true,
+ 		"add_layout":true
+ 	}
+-}
+\ No newline at end of file
++}
