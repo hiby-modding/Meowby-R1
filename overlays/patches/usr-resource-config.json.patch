@@ -1,0 +1,18 @@
+--- /home/ori/code/Hiby-R1-Mod/overlays/patch-reference/usr/resource/config.json	2025-12-03 05:23:01.000000000 +0100
++++ ./usr/resource/config.json	2026-04-23 15:39:42.918710095 +0200
+@@ -22,13 +22,13 @@
+         "type":"volume",
+         "vol_warn_enable":1,
+         "lock_vol":[
+-            {"headset":50}
++            {"headset":100}
+         ],
+         "default_vol":[
+             {"headset":20}
+         ],
+         "warn_vol":[
+-            {"headset":34}
++            {"headset":100}
+         ]
+     },
+     {
