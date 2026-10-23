@@ -11,7 +11,8 @@ REFERENCE_ROOT="$OVERLAY_DIR/patch-reference"
 
 if [[ ! -d "$SQUASHFS_ROOT" ]]; then
     echo "Error: squashfs-root/ directory not found in current directory."
-    echo "Run 'nix run .#unpack' first to extract the firmware."
+    echo "Run 'nix run --experimental-features \'nix-command flakes\' .#unpack' or '\$(nix-build -A unpack --no-out-link)/bin/hiby-unpack' first to extract the firmware."
+    exit 1
     exit 1
 fi
 
@@ -24,12 +25,11 @@ if [[ ! -d "$REFERENCE_ROOT" ]]; then
     echo "No clean reference found. Creating one..."
     echo "This will extract a fresh copy for comparison."
 
-    # Use nix run .#unpack to create the reference root
-    echo "Using nix run .#unpack to create reference..."
+    echo "Using nix-build -A unpack’s bin to create reference..."
 
-    # The unpack command will use the original UPT from the flake
+    # The unpack command will use the original UPT from Nix output
     # and extract to our specified reference directory
-    nix run .#unpack -- "$REFERENCE_ROOT"
+    $(nix-build -A unpack --no-out-link)/bin/hiby-unpack "$REFERENCE_ROOT"
 
     echo "Making reference root read-only..."
     # Make entire reference root read-only to prevent accidental modification

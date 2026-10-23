@@ -10,7 +10,7 @@ SQUASHFS_ROOT="$PROJECT_DIR/squashfs-root"
 
 if [[ ! -d "$SQUASHFS_ROOT" ]]; then
     echo "Error: squashfs-root/ directory not found in current directory."
-    echo "Run 'nix run .#unpack' first to extract the firmware."
+    echo "Run 'nix run --experimental-features \'nix-command flakes\' .#unpack' or '\$(nix-build -A unpack --no-out-link)/bin/hiby-unpack' first to extract the firmware."
     exit 1
 fi
 
