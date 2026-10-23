@@ -3,115 +3,45 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    { self, nixpkgs }:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "i686-linux"
+        "aarch64-darwin"
+        "riscv64-linux"
+      ];
+
+      eachSystem =
+        systems: f:
+        builtins.foldl' (
+          a: s: a // builtins.mapAttrs (k: v: (a.${k} or { }) // { ${s} = v; }) (f s)
+        ) { } systems;
+    in
+    {
+      overlays.default = import ./nix/overlay;
+    }
+    // eachSystem supportedSystems (
+      system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        lib = pkgs.lib;
-
-        # Common dependencies needed by both scripts
-        toolDeps = with pkgs; [
-          p7zip              # 7z command for .upt extraction
-          squashfsTools      # unsquashfs/mksquashfs
-          cdrkit             # genisoimage for ISO creation
-          coreutils          # md5sum, split, stat, cat
-          fakeroot           # replace sudo requirement
-          bash               # shell interpreter
-          rsync              # for overlay file copying
-          patch              # for applying patches
-          diffutils          # for generating patches
-        ];
-
-        hiByOS-v1-6 = pkgs.fetchurl {
-          # https://drive.google.com/drive/folders/1A2RIMdvuZRzGCNMY9F81vtGAAs2FJ46W?usp=sharing
-          url = "https://drive.usercontent.google.com/download?export=download&id=1cvZdQeJsb2qYu2qv6sZaYJaP8vqW1LqG&confirm=t";
-          sha256 = "sha256-mq2oGZXY0rLtgNbPKSxivF8PcF5R5PacfnZu5nU2umA=";
-          name = "HiBy-OS-v1.6.upt";
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ self.overlays.default ];
         };
 
-        # Create wrapper that replaces sudo with fakeroot in the original unpack script
-        unpack-wrapper = pkgs.writeScriptBin "hiby-unpack" ''
-          #!${lib.getExe pkgs.bash}
-          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-
-          # TEMP_SCRIPT=${./unpack_pack/unpack.sh}
-
-          # Create a modified version of unpack.sh that uses fakeroot instead of sudo
-          TEMP_SCRIPT=$(mktemp)
-          sed 's/sudo unsquashfs/fakeroot unsquashfs/g' \
-            ${./unpack_pack/unpack.sh} > "$TEMP_SCRIPT"
-          chmod +x "$TEMP_SCRIPT"
-
-          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "${self.packages.${system}.original}" "$@"
-        '';
-
-        # Create wrapper that replaces sudo with fakeroot in the original repack script
-        repack-wrapper = pkgs.writeScriptBin "hiby-repack" ''
-          #!${lib.getExe pkgs.bash}
-          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-
-          # TEMP_SCRIPT=${./unpack_pack/repack.sh}
-
-          # Create a modified version of repack.sh that uses fakeroot instead of sudo
-          TEMP_SCRIPT=$(mktemp)
-          sed 's/sudo mksquashfs/fakeroot mksquashfs/g; s/sudo unsquashfs/fakeroot unsquashfs/g' \
-            ${./unpack_pack/repack.sh} > "$TEMP_SCRIPT"
-          chmod +x "$TEMP_SCRIPT"
-
-          # Execute the modified script
-          exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "./squashfs-root/"
-        '';
-
-        # Overlay management wrappers
-        apply-overlay-wrapper = pkgs.writeScriptBin "hiby-apply-overlay" ''
-          #!${lib.getExe pkgs.bash}
-          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-          cd "$(pwd)"
-          exec ${lib.getExe pkgs.bash} ${./overlays/scripts/apply-overlay.sh} "$@"
-        '';
-
-        create-overlay-wrapper = pkgs.writeScriptBin "hiby-create-overlay" ''
-          #!${lib.getExe pkgs.bash}
-          export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-          cd "$(pwd)"
-          exec ${lib.getExe pkgs.bash} ${./overlays/scripts/create-overlay.sh} "$@"
-        '';
-
-      in {
-        apps = {
-          unpack = {
-            type = "app";
-            program = "${unpack-wrapper}/bin/hiby-unpack";
-          };
-
-          repack = {
-            type = "app";
-            program = "${repack-wrapper}/bin/hiby-repack";
-          };
-
-          apply-overlay = {
-            type = "app";
-            program = "${apply-overlay-wrapper}/bin/hiby-apply-overlay";
-          };
-
-          create-overlay = {
-            type = "app";
-            program = "${create-overlay-wrapper}/bin/hiby-create-overlay";
-          };
+        inherit (pkgs) lib;
+      in
+      {
+        packages = lib.filterAttrs (_: lib.isDerivation) pkgs.Meowby-R1 // {
+          original = self.packages.${system}.stockFirmwareImage;
         };
 
-        packages = {
-          inherit unpack-wrapper repack-wrapper apply-overlay-wrapper create-overlay-wrapper;
-          default = pkgs.symlinkJoin {
-            name = "hiby-tools";
-            paths = [ unpack-wrapper repack-wrapper apply-overlay-wrapper create-overlay-wrapper ];
-          };
-          original = hiByOS-v1-6;
+        checks = {
+          defaultPkg = self.packages.${system}.default;
         };
       }
     );
