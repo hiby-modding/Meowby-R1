@@ -6,9 +6,12 @@ A local copy of the Firmware for development can be generated using `nix run .#u
 After meowking the desired changes one simply runs `nix run .#create-overlay` to generate the [patch files](./overlays/patches/usr-bin-bt_init.patch). This basically compares the local working copy against a imutable copy of the original firmware.
 
 To build a ready-to-deploy fw image based of these patches one simply runs these 3 commands:
+
 1. `nix run .#unpack`
 2. `nix run .#apply-overlay`
 3. `nix run .#repack`
+
+*NOTE: requires `experimental-features = flakes nix-command`, stable Nix entrypoint with `nix-build -A $ATTR`*
 
 # Goals for Meowby:
 
