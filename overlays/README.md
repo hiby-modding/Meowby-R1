@@ -35,7 +35,7 @@ Store only your squashfs modifications in git while keeping the full filesystem 
 ## How It Works
 
 - **`overlays/files/`**: New or replacement files (git-tracked)
-- **`overlays/patches/`**: Patches for modified existing files (git-tracked)  
+- **`overlays/patches/`**: Patches for modified existing files (git-tracked)
 - **`overlays/scripts/`**: Overlay management scripts (git-tracked)
 - **`squashfs-root/`**: Full extracted filesystem (gitignored)
 - **`squashfs-root-clean/`**: Clean reference for comparison (gitignored, read-only)

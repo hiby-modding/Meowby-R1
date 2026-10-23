@@ -13,11 +13,11 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         lib = pkgs.lib;
-        
+
         # Common dependencies needed by both scripts
         toolDeps = with pkgs; [
           p7zip              # 7z command for .upt extraction
-          squashfsTools      # unsquashfs/mksquashfs 
+          squashfsTools      # unsquashfs/mksquashfs
           cdrkit             # genisoimage for ISO creation
           coreutils          # md5sum, split, stat, cat
           fakeroot           # replace sudo requirement
@@ -38,7 +38,7 @@
         unpack-wrapper = pkgs.writeScriptBin "hiby-unpack" ''
           #!${lib.getExe pkgs.bash}
           export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-          
+
           # TEMP_SCRIPT=${./unpack_pack/unpack.sh}
 
           # Create a modified version of unpack.sh that uses fakeroot instead of sudo
@@ -46,15 +46,15 @@
           sed 's/sudo unsquashfs/fakeroot unsquashfs/g' \
             ${./unpack_pack/unpack.sh} > "$TEMP_SCRIPT"
           chmod +x "$TEMP_SCRIPT"
-          
+
           exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "${self.packages.${system}.original}" "$@"
         '';
 
-        # Create wrapper that replaces sudo with fakeroot in the original repack script  
+        # Create wrapper that replaces sudo with fakeroot in the original repack script
         repack-wrapper = pkgs.writeScriptBin "hiby-repack" ''
           #!${lib.getExe pkgs.bash}
           export PATH=${pkgs.lib.makeBinPath toolDeps}:$PATH
-          
+
           # TEMP_SCRIPT=${./unpack_pack/repack.sh}
 
           # Create a modified version of repack.sh that uses fakeroot instead of sudo
@@ -62,7 +62,7 @@
           sed 's/sudo mksquashfs/fakeroot mksquashfs/g; s/sudo unsquashfs/fakeroot unsquashfs/g' \
             ${./unpack_pack/repack.sh} > "$TEMP_SCRIPT"
           chmod +x "$TEMP_SCRIPT"
-          
+
           # Execute the modified script
           exec ${lib.getExe pkgs.bash} "$TEMP_SCRIPT" "./squashfs-root/"
         '';
@@ -88,7 +88,7 @@
             type = "app";
             program = "${unpack-wrapper}/bin/hiby-unpack";
           };
-          
+
           repack = {
             type = "app";
             program = "${repack-wrapper}/bin/hiby-repack";

@@ -24,7 +24,7 @@ My ultimate goal with this for is the implementation ofd a Open-Subsonic client 
 
 # HiBy R1 / MiDi R1 Firmware Modifications
 
-Firmware patches for the **HiBy R1** and **MiDi R1** portable music players.  
+Firmware patches for the **HiBy R1** and **MiDi R1** portable music players.
 Device runs HiBy Linux on an **Ingenic X1600** MIPS SoC with a **Cirrus Logic CS43131** DAC/amp chip.
 
 ---
@@ -46,8 +46,8 @@ The player hard-capped the UI volume slider at 50/100 steps regardless of the CS
 ### 2. MDB / LDB Hardware Gain Tables Fixed
 **File:** `usr/resource/ot_devices.json`
 
-The MDB and LDB volume tables stopped at CS43131 register value `12` instead of `0`.  
-Register `0` = 0 dB (true maximum output). Register `12` ≈ −0.75 dB below full output.  
+The MDB and LDB volume tables stopped at CS43131 register value `12` instead of `0`.
+Register `0` = 0 dB (true maximum output). Register `12` ≈ −0.75 dB below full output.
 Changed the last entry in both `MDB` and `LDB` `Values` arrays from `12` → `0`.
 
 ---
@@ -55,7 +55,7 @@ Changed the last entry in both `MDB` and `LDB` `Values` arrays from `12` → `0`
 ### 3. Native DSD Enabled
 **File:** `usr/resource/ot_devices.json`
 
-All three DSD output paths were forced to DoP even when the user selected Native mode.  
+All three DSD output paths were forced to DoP even when the user selected Native mode.
 The CS43131 supports hardware native DSD over I2S.
 
 | Field | Before | After |
@@ -83,8 +83,8 @@ The player binary reads several keys from `ot_devices.json` that were absent in 
 "SPDIF_MAX_192K":           0
 ```
 
-`ANALOG_PCM_HW_SAMPLE_MAX: 384000` matches the CS43131's hardware ceiling and the analog device `SampleRate` list already declared in the same file.  
-`SPDIF_MAX_192K: 0` removes the 192 kHz cap on the SPDIF output path.  
+`ANALOG_PCM_HW_SAMPLE_MAX: 384000` matches the CS43131's hardware ceiling and the analog device `SampleRate` list already declared in the same file.
+`SPDIF_MAX_192K: 0` removes the 192 kHz cap on the SPDIF output path.
 `USE_VOLUME_CHIP: 0` — **must be `0`** if used. Setting this to `1` forces volume writes directly to the CS43131 ALSA hardware registers, which are not wired up in this firmware version. With `1`, the volume buttons show UI movement but produce no audio change.
 
 These keys were removed after testing — the firmware behaves correctly without them using its built-in defaults.
@@ -94,7 +94,7 @@ These keys were removed after testing — the firmware behaves correctly without
 ### 5. Hardware-Only Volume Control
 **File:** `usr/resource/ot_devices.json`
 
-> **⚠ Reverted — do not set to `0`.**  
+> **⚠ Reverted — do not set to `0`.**
 > Setting `SET_HW_SW_VOL_BOTH: 0` causes the volume buttons to show UI movement with no audio change (volume buttons stop working). Leave at `1`.
 
 | Field | Value |
@@ -164,7 +164,7 @@ Replaced the stock player binary with the community-patched sorting variant from
 | Symbol-prefixed titles | Mixed into alphabet | Sorted first (before A) |
 | Multi-language sort | ASCII only | Unicode-aware; handles CJK, Cyrillic, Latin extended, etc. |
 
-**Source:** https://github.com/hiby-modding/hiby-mods/tree/main/binaries  
+**Source:** https://github.com/hiby-modding/hiby-mods/tree/main/binaries
 **Compatibility note:** The upstream repo primarily targets the HiBy R3 Pro II. Tested to boot and function on the R1 — verify your own build before flashing.
 
 ---
@@ -356,7 +356,7 @@ After 3 minutes with no pairing the device stops advertising. Already-paired dev
 ---
 ## HiBy R1 — File Limit Patch (50,000 → 65,000 Tracks)
 
-**Target binary:** `/usr/bin/hiby_player` (MIPS32 LE ELF, 4,855,400 bytes)  
+**Target binary:** `/usr/bin/hiby_player` (MIPS32 LE ELF, 4,855,400 bytes)
 **Change:** Increases the music database track limit from 50,000 to 65,000 (`0xC350` → `0xFDE8`)
 
 ---
@@ -487,6 +487,6 @@ PEQ settings (Headphones preset):
 
 ## Disclaimer
 
-These are filesystem-level config and layout file edits — no kernel modifications.  
-Changes affect audio output levels. Use appropriate volume and hearing protection.  
+These are filesystem-level config and layout file edits — no kernel modifications.
+Changes affect audio output levels. Use appropriate volume and hearing protection.
 Flash and use at your own risk.

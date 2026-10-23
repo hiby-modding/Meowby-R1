@@ -23,14 +23,14 @@ echo "======================================"
 if [[ ! -d "$REFERENCE_ROOT" ]]; then
     echo "No clean reference found. Creating one..."
     echo "This will extract a fresh copy for comparison."
-    
+
     # Use nix run .#unpack to create the reference root
     echo "Using nix run .#unpack to create reference..."
-    
+
     # The unpack command will use the original UPT from the flake
     # and extract to our specified reference directory
     nix run .#unpack -- "$REFERENCE_ROOT"
-    
+
     echo "Making reference root read-only..."
     # Make entire reference root read-only to prevent accidental modification
     chmod -R a-w "$REFERENCE_ROOT"
@@ -53,7 +53,7 @@ cd "$SQUASHFS_ROOT"
 find . -type f | while read -r file; do
     rel_path="${file#./}"
     reference_file="$REFERENCE_ROOT/$rel_path"
-    
+
     if [[ ! -f "$reference_file" ]]; then
         # New file - copy to overlay
         echo "  New file: $rel_path"
@@ -63,10 +63,10 @@ find . -type f | while read -r file; do
     elif ! diff -q "$file" "$reference_file" >/dev/null 2>&1; then
         # Modified file - create patch
         echo "  Modified: $rel_path"
-        
+
         # Create patch filename (replace / with -)
         patch_name=$(echo "$rel_path" | tr '/' '-').patch
-        
+
         # Generate patch (from reference to modified)
         diff -u "$reference_file" "$file" > "$OVERLAY_DIR/patches/$patch_name" || true
         CAPTURED_PATCHES=$((CAPTURED_PATCHES + 1))
@@ -76,7 +76,7 @@ done
 cd "$PROJECT_DIR"
 
 echo "✅ Overlay created!"
-echo "  $CAPTURED_FILES new/replacement files captured"  
+echo "  $CAPTURED_FILES new/replacement files captured"
 echo "  $CAPTURED_PATCHES patches created"
 echo ""
 echo "Files stored in overlays/files/"
